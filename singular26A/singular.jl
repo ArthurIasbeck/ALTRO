@@ -1,6 +1,6 @@
 using TrajectoryOptimization
 using LinearAlgebra
-using DelimitedFiles # used to write arrays in files
+using DelimitedFiles # Utilizado para escrever vetores em arquivos
 
 function dynamics!(ẋ,x,u) # inplace dynamics
     ẋ[1] = x[2]
@@ -21,10 +21,37 @@ N = 500 # number of knot points
 
 U0 = [0.01*rand(m) for k = 1:N-1]; # initial control trajectory
 
-Q = 1.0*Diagonal(I,n)
-Qf = 1.0*Diagonal(I,n)
-R = 1.0e-1*Diagonal(I,m)
-obj = LQRObjective(Q,R,Qf,xf,N) # objective
+# Definição da função objetivo
+Q = zeros(n,n)
+R = zeros(m,m);
+Qf = zeros(n,n);
+H = zeros(m,n);
+q = zeros(1,n);
+r = zeros(1,n);
+c = 0;
+qf = [.0 .0 1.];
+cf = 0;
+
+"
+Q = [0.1 0.0 0.0; 0.0 0.1 0.0; 0.0 0.0 0.1] nxn
+R = [0.1] mxm
+Qf = [1000 0 0; 0 1000 0; 0 0 1000] nxn
+H = [0.0 0.0 0.0] mxn
+q = [-0.0, -0.0, -0.026900000000000004] 1xn
+r = [0.0] 1xm
+c = 0.0036180500000000007 cte
+qf = [-0.0, -0.0, -269.0] 1xn
+cf = 36.1805 cte
+"
+
+# O QuadraticCost não está funcionando. Preciso procurar algum exemplo em que
+# ele foi utilizado pra me basear
+
+costfun      = QuadraticCost(Q, R, H, q, r, c)
+costfun_term = QuadraticCost(Qf, R*0, H, qf, r*0, cf)
+obj = Objective(costfun, costfun_term, N)
+
+# obj = LQRObjective(Q,R,Qf,xf,N) # objective
 
 bnd = BoundConstraint(n,m,u_max=1, u_min=-1) # control limits
 goal = goal_constraint(xf) # terminal constraint
