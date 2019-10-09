@@ -34,17 +34,34 @@ U0 = [0.01*rand(m) for k = 1:N-1]; # initial control trajectory
 # cf = 1x1
 
 # Definição da função objetivo
-# Define the stage and terminal cost functions
-function mycost(x,u)
-    return 0
-end
-function mycost(xN)
-    return xN[3]
-end
 
-# Create the nonlinear cost function
-nlcost = GenericCost(mycost,mycost,n,m)
-obj = Objective(nlcost, N)
+# Parâmetros originais do QuadraticCost utilizados neste códigos. Eles remetem
+# a um custo do tipo LQR
+
+# Q = 1.0*Diagonal(I,n)
+# Qf = 1.0*Diagonal(I,n)
+# R = 1.0e-1*Diagonal(I,m)
+# H = zeros(size(R,1),size(Q,1))
+# q = -Q*xf
+# r = zeros(size(R,1))
+# c = 0.5*xf'*Q*xf
+# qf = -Qf*xf
+# cf = 0.5*xf'*Qf*xf
+
+Q = 0.0*Diagonal(I,n)
+Qf = 0.0*Diagonal(I,n)
+R = 0.000001*Diagonal(I,m)
+H = zeros(size(R,1),size(Q,1))
+q = 0.0*-Q*xf
+r = zeros(size(R,1))
+c = 0.0*xf'*Q*xf
+qf = [0.0, 0.0, 1.0]
+cf = 0.0*xf'*Qf*xf
+
+ℓ = QuadraticCost(Q, R, H, q, r, c)
+ℓN = QuadraticCost(Qf, qf, cf)
+
+obj = Objective([k < N ? ℓ : ℓN for k = 1:N])
 
 bnd = BoundConstraint(n,m,u_max=1, u_min=-1) # control limits
 goal = goal_constraint(xf) # terminal constraint
