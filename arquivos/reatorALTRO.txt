@@ -1,0 +1,84 @@
+Implementando o problema de reator no ALTRO
+
+1 - Baixei o código de exemplo
+
+2 - Instalei o Visual Studio Code
+
+sudo apt update
+sudo apt install software-properties-common apt-transport-https wget
+wget -q https://packages.microsoft.com/keys/microsoft.asc -O- | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
+sudo apt update
+sudo apt install code
+
+3 - Instalei a extensão para trabalhar com o Julia
+
+4 - Percebi que a extensão não habilitava escrita de letras gregas
+
+5 - Procurei uma forma de trabalhar com as letras gregas
+
+6 - Encontrei um pacote interpretador de símbolos Unicode que não funcionou
+
+7 - Quando eu abria um arquivo ".jl", um erro indicando não ter sido possível se conectar com o "Julia Server" era acusado
+
+Could not start the julia language server. Make sure the configuration setting julia.executablePath points to the julia binary.
+
+8 - Aparentemente isso ocorre quando o Visual Studio Code não encontra o local onde está instalado o Julia
+
+9 - Todas as minhas tentativas de resolver o problema fracassaram
+
+10 - Decidi passar para o Atom
+
+11 - Instalei o Atom
+
+wget -O atom-amd64.deb https://atom.io/download/deb
+sudo apt install gdebi-core
+sudo gdebi atom-amd64.deb
+
+12 - Instalei a extensão do Atom para trabalhar com o Julia (language-julia)
+
+13 - Instalei a extensão do Atom para reconhecer símbolos Latex (latex-completions)
+
+14 - Tentei utilizar a biblioteca Plots para já plotar os resultados da execução no próprio Júlia, sem ter que criar um script Matlab só pra isso
+
+15 - Instalei a biblioteca Plots
+
+using Pkg; Pkg.add("Plots")
+
+16 - Ao executar o exemplo encontrado no link (http://docs.juliaplots.org/latest/) foi acusado um erro
+
+QStandardPaths: XDG_RUNTIME_DIR not set, defaulting to '/tmp/runtime-root'
+
+17 - Quando utilizo o terminal do Julia, o plot funciona apesar deste erro, mas quando executo um arquivo ".jl", o plot não aparece
+
+18 - Depois de uma série de tentativas frustradas cheguei à conclusão de que não vale a pena insistir em plotar utilizando o Julia. Ganheirei tempo implementando o plot com o Matlab. Pra salvar os dados gerados em um arquivo utilizei a bibliote "DelimitedFiles"
+
+writedlm("./xSol.txt", prob.X)
+writedlm("./uSol.txt", prob.U)
+
+19 - Quando fui desenvolver no Matlab o código para plotar os resultados do ALTRO, percebi que ainda não tinha atualizado o backup das minhas funções
+
+20 - Coloquei minhas funções na pasta "~/matlab", criei um arquivo "startup.m" na pasta "home" e nele adicionei a pasta onde se encontravam meus códigos ao path do Matlab
+
+addpath('matlab')
+
+21 - Fiz um código para mostrar os resultados do ALTRO (mais especificamente a ação de controle e os estados)
+
+22 - Tentei modificar o código exemplo para ver se eu entendi melhor o funcionamento do ALTRO. Modifiquei o estado final e obtive um aviso
+
+Warning: Cost exceeded maximum cost
+└ @ TrajectoryOptimization ~/.julia/packages/TrajectoryOptimization/jSddq/src/solvers/ilqr/ilqr_methods.jl:24
+
+23 - Depois de avaliar os estados, percebi que o estado final determinado não havia sido alcançado. Almentei a ação de controle para tentar compensar o aumento do estado (lembrando que o tempo de simulação não foi alterado). Obtive um resultado satisfatório, com uma ação de controle bem acentuada
+
+24 - Alterei também o número de nós e o passo de tempo da simulação
+
+25 - Quando fui resolver os PCOs sugeridos pelo professor, eu não consegui criar um objetivo no ALTRO sem definir os estados finais. O problema é que nestes PCOs eu não defino estados finais, até porque a função objetivo depende de x3(tf). Então eu fiz o caminho inverso. Eu vi qual x3(tf) os problemas alcançaram e coloquei estes valores como final. Desta forma obtive resultados muito próximos daqueles obtidos analiticamente. Porém, não posso resolver o problema desta forma
+
+26 - Tentei rodar o exemplo "/home/iasbeck/TrajectoryOptimization.jl/examples/IROS_2019/acrobot.jl" pra ver o DIRCOL sendo implementado pelo "TrajectoryOptimization", porém obtive erros ao longo das execuções
+
+27 - Foi necessário adicionar ao começo do scrip "using TrajectoryOptimization"
+
+28 - Instalei o pacote "Ipopt.jl" (https://github.com/JuliaOpt/Ipopt.jl) já que eu estava me deparando com um erro na execução do "acrobot.jl" quando era declarado um objetivo "Ipopt.Optimazer". O erro permaneceu.
+
+import Pkg; Pkg.add("Ipopt")
