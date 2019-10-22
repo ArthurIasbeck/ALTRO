@@ -16,8 +16,11 @@ model_d = rk3(model) # create discrete model w/ rk3 integration
 x0 = [0.; 1.; 0.] # initial state
 xf = [0.; 0.; 0.8285] # goal state
 
-dt = 0.01 # time step
-N = 500 # number of knot points
+dt = 1 # time step
+N = 5 # number of points
+
+#  Testar vários valores pra discretização e construir um gráfico. Começar
+#  pelo ALTRO e estudar melhor a fundo como ele funciona. 
 
 U0 = [0.01*rand(m) for k = 1:N-1]; # initial control trajectory
 
